@@ -60,11 +60,22 @@ class BackendClient:
         metadata: dict | None = None,
     ) -> bool:
         """Notify the backend that the bot joined a guild. Returns True on success."""
+        # Online count from presences (if available) or approximate
+        online_count = 0
+        try:
+            online_count = sum(
+                1 for m in guild.members
+                if m.status != discord.Status.offline and not m.bot
+            )
+        except Exception:
+            online_count = guild.approximate_presence_count or 0
+
         payload = {
             "guild_id": str(guild.id),
             "name": guild.name,
             "icon_url": str(guild.icon.url) if guild.icon else None,
             "member_count": guild.member_count,
+            "online_count": online_count,
             "invite_code": invite_code,
             "metadata": metadata,
         }

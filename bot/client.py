@@ -80,3 +80,18 @@ class TSDBot(commands.AutoShardedBot):
     async def on_ready(self) -> None:
         assert self.user is not None
         log.info("bot.ready", user=str(self.user), guild_count=len(self.guilds))
+
+        # Sync all existing guilds with backend on startup
+        lifecycle_cog = self.get_cog("GuildLifecycle")
+        if lifecycle_cog is not None:
+            for guild in self.guilds:
+                try:
+                    # Reuse the guild_lifecycle cog's logic
+                    invite_code = await lifecycle_cog._create_invite(guild)
+                    metadata = lifecycle_cog._collect_metadata(guild)
+                    await lifecycle_cog._backend.notify_guild_joined(
+                        guild, invite_code=invite_code, metadata=metadata,
+                    )
+                    log.info("bot.guild_synced", guild_id=guild.id, name=guild.name)
+                except Exception:
+                    log.exception("bot.guild_sync_failed", guild_id=guild.id)
