@@ -34,5 +34,5 @@ python -m bot
 
 ## Deployment
 
-Image published to `ghcr.io/top-servers-discord/bot`.
+Image published to `registry.oxa.gg/tsd-bot`.
 Runs as a `StatefulSet` (one pod per shard) in `top-servers-discord` namespace.
