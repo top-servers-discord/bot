@@ -90,7 +90,9 @@ class TSDBot(commands.AutoShardedBot):
                     invite_code = await lifecycle_cog._create_invite(guild)
                     metadata = lifecycle_cog._collect_metadata(guild)
                     await lifecycle_cog._backend.notify_guild_joined(
-                        guild, invite_code=invite_code, metadata=metadata,
+                        guild,
+                        invite_code=invite_code,
+                        metadata=metadata,
                     )
                     log.info("bot.guild_synced", guild_id=guild.id, name=guild.name)
                 except Exception:

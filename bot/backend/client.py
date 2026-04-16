@@ -64,8 +64,7 @@ class BackendClient:
         online_count = 0
         try:
             online_count = sum(
-                1 for m in guild.members
-                if m.status != discord.Status.offline and not m.bot
+                1 for m in guild.members if m.status != discord.Status.offline and not m.bot
             )
         except Exception:
             online_count = guild.approximate_presence_count or 0
