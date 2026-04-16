@@ -48,6 +48,28 @@ class GuildLifecycle(commands.Cog):
         log.warning("guild.no_invite_channel", guild_id=guild.id)
         return None
 
+    def _collect_metadata(self, guild: discord.Guild) -> dict:
+        """Collect server metadata for AI description generation."""
+        categories = []
+        for cat in guild.categories:
+            channels = [ch.name for ch in cat.channels if isinstance(ch, discord.TextChannel)]
+            categories.append({"name": cat.name, "channels": channels[:10]})
+
+        uncategorized = [
+            ch.name for ch in guild.text_channels if ch.category is None
+        ][:10]
+
+        return {
+            "name": guild.name,
+            "description": guild.description or "",
+            "member_count": guild.member_count,
+            "categories": categories[:15],
+            "uncategorized_channels": uncategorized,
+            "features": list(guild.features)[:10],
+            "premium_tier": guild.premium_tier,
+            "preferred_locale": str(guild.preferred_locale),
+        }
+
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild) -> None:
         log.info(
@@ -57,11 +79,12 @@ class GuildLifecycle(commands.Cog):
             member_count=guild.member_count,
         )
 
-        # Create a permanent invite
         invite_code = await self._create_invite(guild)
+        metadata = self._collect_metadata(guild)
 
-        # Notify backend with invite code
-        await self._backend.notify_guild_joined(guild, invite_code=invite_code)
+        await self._backend.notify_guild_joined(
+            guild, invite_code=invite_code, metadata=metadata,
+        )
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
