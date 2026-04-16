@@ -29,6 +29,7 @@ class EventEmitter:
         """Put an event on the queue. Drops if the queue is full."""
         try:
             self._queue.put_nowait(event)
+            log.debug("emitter.queued", event_type=event.event_type, queue_size=self._queue.qsize())
         except asyncio.QueueFull:
             log.warning("emitter.queue_full", event_type=event.event_type, guild_id=event.guild_id)
 
@@ -67,14 +68,16 @@ class EventEmitter:
         for attempt in range(_MAX_RETRIES):
             try:
                 await self._ch.insert_events(batch)
+                log.info("emitter.flushed", count=len(batch))
                 return
-            except Exception:
+            except Exception as exc:
                 wait = _BASE_BACKOFF * (2**attempt)
                 log.warning(
                     "emitter.flush_retry",
                     attempt=attempt + 1,
                     batch_size=len(batch),
                     backoff=wait,
+                    error=str(exc),
                 )
                 await asyncio.sleep(wait)
 
