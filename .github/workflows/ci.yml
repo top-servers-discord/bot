@@ -52,7 +52,7 @@ jobs:
 
       - uses: docker/login-action@v3
         with:
-          registry: registry.topserversdiscord.com
+          registry: registry.oxa.gg
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
@@ -61,8 +61,8 @@ jobs:
           context: .
           push: true
           tags: |
-            registry.topserversdiscord.com/tsd-bot:sha-${{ steps.vars.outputs.sha }}
-            registry.topserversdiscord.com/tsd-bot:latest
+            registry.oxa.gg/tsd-bot:sha-${{ steps.vars.outputs.sha }}
+            registry.oxa.gg/tsd-bot:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
