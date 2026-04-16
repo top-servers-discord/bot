@@ -52,13 +52,16 @@ class BackendClient:
 
     # -- public API ------------------------------------------------------------
 
-    async def notify_guild_joined(self, guild: discord.Guild) -> bool:
+    async def notify_guild_joined(
+        self, guild: discord.Guild, *, invite_code: str | None = None
+    ) -> bool:
         """Notify the backend that the bot joined a guild. Returns True on success."""
         payload = {
             "guild_id": str(guild.id),
             "name": guild.name,
             "icon_url": str(guild.icon.url) if guild.icon else None,
             "member_count": guild.member_count,
+            "invite_code": invite_code,
         }
         try:
             await self._post("/internal/guild-joined", payload)

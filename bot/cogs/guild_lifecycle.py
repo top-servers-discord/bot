@@ -26,6 +26,28 @@ class GuildLifecycle(commands.Cog):
     async def cog_unload(self) -> None:
         await self._backend.close()
 
+    async def _create_invite(self, guild: discord.Guild) -> str | None:
+        """Create a permanent invite for the guild's first available text channel."""
+        for channel in guild.text_channels:
+            try:
+                perms = channel.permissions_for(guild.me)
+                if perms.create_instant_invite:
+                    invite = await channel.create_invite(
+                        max_age=0,
+                        max_uses=0,
+                        unique=False,
+                        reason="TopServersDiscord — permanent listing invite",
+                    )
+                    log.info("guild.invite_created", guild_id=guild.id, code=invite.code)
+                    return invite.code
+            except discord.Forbidden:
+                continue
+            except Exception:
+                log.exception("guild.invite_error", guild_id=guild.id, channel_id=channel.id)
+                continue
+        log.warning("guild.no_invite_channel", guild_id=guild.id)
+        return None
+
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild) -> None:
         log.info(
@@ -34,7 +56,12 @@ class GuildLifecycle(commands.Cog):
             name=guild.name,
             member_count=guild.member_count,
         )
-        await self._backend.notify_guild_joined(guild)
+
+        # Create a permanent invite
+        invite_code = await self._create_invite(guild)
+
+        # Notify backend with invite code
+        await self._backend.notify_guild_joined(guild, invite_code=invite_code)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild) -> None:
