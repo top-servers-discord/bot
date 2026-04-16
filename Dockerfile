@@ -13,9 +13,9 @@ COPY bot ./bot
 RUN pip install --upgrade pip && pip install .
 
 FROM base AS runner
-RUN addgroup --system bot && adduser --system --ingroup bot bot
+RUN addgroup --system --gid 1001 bot && adduser --system --uid 1001 --ingroup bot bot
 COPY --from=builder /usr/local/lib/python3.14/site-packages /usr/local/lib/python3.14/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY bot ./bot
-USER bot
+USER 1001
 CMD ["python", "-m", "bot"]
