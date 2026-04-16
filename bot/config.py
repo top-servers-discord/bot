@@ -12,6 +12,7 @@ class BotSettings(BaseSettings):
     shard_ids: list[int] | None = None
 
     clickhouse_url: str = Field(default="http://localhost:8123")
+    clickhouse_password: str = Field(default="")
     valkey_url: str = Field(default="redis://localhost:6379/0")
 
     backend_url: str = Field(default="http://localhost:8000")
