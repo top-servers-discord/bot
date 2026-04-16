@@ -51,9 +51,7 @@ class Commands(commands.Cog):
         assert guild is not None  # guaranteed by guild_only
 
         online_count = sum(
-            1
-            for m in guild.members
-            if m.status is not discord.Status.offline and not m.bot
+            1 for m in guild.members if m.status is not discord.Status.offline and not m.bot
         )
 
         embed = discord.Embed(

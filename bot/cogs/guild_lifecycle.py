@@ -55,9 +55,7 @@ class GuildLifecycle(commands.Cog):
             channels = [ch.name for ch in cat.channels if isinstance(ch, discord.TextChannel)]
             categories.append({"name": cat.name, "channels": channels[:10]})
 
-        uncategorized = [
-            ch.name for ch in guild.text_channels if ch.category is None
-        ][:10]
+        uncategorized = [ch.name for ch in guild.text_channels if ch.category is None][:10]
 
         return {
             "name": guild.name,
@@ -83,7 +81,9 @@ class GuildLifecycle(commands.Cog):
         metadata = self._collect_metadata(guild)
 
         await self._backend.notify_guild_joined(
-            guild, invite_code=invite_code, metadata=metadata,
+            guild,
+            invite_code=invite_code,
+            metadata=metadata,
         )
 
     @commands.Cog.listener()

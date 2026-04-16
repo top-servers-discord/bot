@@ -41,9 +41,7 @@ class ClickHouseClient:
         if self._client is None:
             raise RuntimeError("ClickHouseClient is not open; call open() first")
 
-        body = "\n".join(
-            event.model_dump_json() for event in events
-        )
+        body = "\n".join(event.model_dump_json() for event in events)
 
         resp = await self._client.post(
             "/",

@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
 
 from bot.ingest.schema import DiscordEvent
 from bot.utils.hashing import hash_user
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bot.client import TSDBot

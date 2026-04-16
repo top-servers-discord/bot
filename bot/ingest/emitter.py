@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 
 import structlog
 
@@ -40,10 +41,8 @@ class EventEmitter:
         """Cancel the flush loop and drain remaining events."""
         if self._flush_task is not None and not self._flush_task.done():
             self._flush_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._flush_task
-            except asyncio.CancelledError:
-                pass
         # Final flush
         await self._flush_once()
 
@@ -70,7 +69,7 @@ class EventEmitter:
                 await self._ch.insert_events(batch)
                 return
             except Exception:
-                wait = _BASE_BACKOFF * (2 ** attempt)
+                wait = _BASE_BACKOFF * (2**attempt)
                 log.warning(
                     "emitter.flush_retry",
                     attempt=attempt + 1,
