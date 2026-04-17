@@ -17,6 +17,7 @@ _COG_EXTENSIONS = [
     "bot.cogs.events_reactions",
     "bot.cogs.commands",
     "bot.cogs.guild_lifecycle",
+    "bot.cogs.leave_poller",
 ]
 
 

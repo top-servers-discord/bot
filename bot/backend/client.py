@@ -97,5 +97,15 @@ class BackendClient:
             log.exception("backend.guild_left.failed", guild_id=guild_id)
             return False
 
+    async def fetch_pending_leaves(self) -> list[int]:
+        """Consume the queue of guild IDs the bot should leave."""
+        try:
+            resp = await self._post("/internal/pending-leaves", {})
+            data = resp.json()
+            return [int(g) for g in data.get("guild_ids", [])]
+        except Exception:
+            log.exception("backend.pending_leaves.failed")
+            return []
+
     async def close(self) -> None:
         await self._http.aclose()
