@@ -1,6 +1,8 @@
+import asyncio
+
 import discord
 import structlog
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from bot.config import get_settings
 from bot.ingest.clickhouse_client import ClickHouseClient
@@ -80,6 +82,41 @@ class TSDBot(commands.AutoShardedBot):
     async def on_ready(self) -> None:
         assert self.user is not None
         log.info("bot.ready", user=str(self.user), guild_count=len(self.guilds))
+
+        # Start rotating status
+        if not self._rotate_status.is_running():
+            self._rotate_status.start()
+
+    @tasks.loop(seconds=15)
+    async def _rotate_status(self) -> None:
+        statuses = [
+            discord.Activity(
+                type=discord.ActivityType.watching,
+                name=f"{len(self.guilds)} servidores activos",
+            ),
+            discord.Activity(
+                type=discord.ActivityType.playing,
+                name="topserversdiscord.com",
+            ),
+            discord.Activity(
+                type=discord.ActivityType.watching,
+                name=f"{len(self.guilds)} active servers",
+            ),
+            discord.Activity(
+                type=discord.ActivityType.listening,
+                name="real-time stats",
+            ),
+            discord.Activity(
+                type=discord.ActivityType.playing,
+                name="topserversdiscord.com",
+            ),
+            discord.Activity(
+                type=discord.ActivityType.watching,
+                name=f"{sum(g.member_count or 0 for g in self.guilds):,} members tracked",
+            ),
+        ]
+        idx = int(asyncio.get_event_loop().time() / 15) % len(statuses)
+        await self.change_presence(activity=statuses[idx])
 
         # Sync all existing guilds with backend on startup
         lifecycle_cog = self.get_cog("GuildLifecycle")
